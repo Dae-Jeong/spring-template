@@ -29,12 +29,11 @@ to_pascal_case() {
 
 # 필수 인자 체크
 if [ "$#" -lt 2 ]; then
-    error "Usage: $0 <new-package-name> <new-project-name> [github-repo-url]"
+    error "Usage: $0 <new-package-name> <new-project-name>"
 fi
 
 NEW_PACKAGE_NAME=$1
 NEW_PROJECT_NAME=$2
-GITHUB_REPO_URL=$3
 OLD_PACKAGE_NAME="org.daejoeng"
 OLD_PROJECT_NAME="spring-template"
 
@@ -51,14 +50,12 @@ info "Initializing new project with:"
 info "Package name: $NEW_PACKAGE_NAME"
 info "Project name: $NEW_PROJECT_NAME"
 info "Application name: ${NEW_PROJECT_NAME_PASCAL}Application"
-if [ ! -z "$GITHUB_REPO_URL" ]; then
-    info "GitHub repository: $GITHUB_REPO_URL"
-fi
 
 # 1. build.gradle 수정
 info "Updating build.gradle..."
 sed -i '' "s/rootProject.name = '$OLD_PROJECT_NAME'/rootProject.name = '$NEW_PROJECT_NAME'/g" settings.gradle
 sed -i '' "s/group = '$OLD_PACKAGE_NAME'/group = '$NEW_PACKAGE_NAME'/g" build.gradle
+sed -i '' "s/mainClass = '$OLD_PACKAGE_NAME.SpringTemplateApplication'/mainClass = '$NEW_PACKAGE_NAME.${NEW_PROJECT_NAME_PASCAL}Application'/g" build.gradle
 
 # 2. 패키지 디렉토리 구조 변경
 info "Updating package structure..."
@@ -109,18 +106,4 @@ chmod +x scripts/setup-git-hooks.sh
 ./scripts/setup-git-hooks.sh
 
 success "Project initialization completed successfully!"
-success "New project '$NEW_PROJECT_NAME' is ready to use."
-success "Git hooks are set up and ready to use."
-if [ ! -z "$GITHUB_REPO_URL" ]; then
-    success "GitHub repository URL: $GITHUB_REPO_URL"
-fi
-info "Next steps:"
-info "1. Review the changes"
-info "2. Run 'git add .' to stage all files"
-info "3. Run 'git commit -m \"Initial commit\"' to create your first commit"
-if [ ! -z "$GITHUB_REPO_URL" ]; then
-    info "4. Run the following commands to push to GitHub:"
-    info "   git remote add origin $GITHUB_REPO_URL"
-    info "   git branch -M main"
-    info "   git push -u origin main"
-fi 
+success "New project '$NEW_PROJECT_NAME' is ready to use." 
