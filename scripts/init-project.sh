@@ -53,7 +53,7 @@ info "Application name: ${NEW_PROJECT_NAME_PASCAL}Application"
 
 # 1. build.gradle 수정
 info "Updating build.gradle..."
-sed -i '' "s/rootProject.name = '$OLD_PROJECT_NAME'/rootProject.name = '$NEW_PROJECT_NAME'/g" settings.gradle
+sed -i '' "s/rootProject.name = 'template'/rootProject.name = '$NEW_PROJECT_NAME'/g" settings.gradle
 sed -i '' "s/group = '$OLD_PACKAGE_NAME'/group = '$NEW_PACKAGE_NAME'/g" build.gradle
 sed -i '' "s/mainClass = '$OLD_PACKAGE_NAME.SpringTemplateApplication'/mainClass = '$NEW_PACKAGE_NAME.${NEW_PROJECT_NAME_PASCAL}Application'/g" build.gradle
 
