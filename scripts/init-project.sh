@@ -95,17 +95,27 @@ chmod +x scripts/setup-git-hooks.sh
 ./scripts/setup-git-hooks.sh
 
 # 8. 초기 커밋
+info "Creating initial commit..."
 git add .
-git commit -m "Initial commit from template"
+if ! git commit -m "Initial commit from template"; then
+    error "Failed to create initial commit. Please check the error messages above."
+fi
 
 # 9. GitHub 저장소 설정 및 푸시
 if [ ! -z "$GITHUB_REPO_URL" ]; then
     info "Setting up GitHub repository..."
-    git remote add origin "$GITHUB_REPO_URL"
+    if ! git remote add origin "$GITHUB_REPO_URL"; then
+        error "Failed to add GitHub remote repository."
+    fi
     
     info "Pushing to GitHub..."
-    git branch -M main
-    git push -u origin main
+    if ! git branch -M main; then
+        error "Failed to create main branch."
+    fi
+    
+    if ! git push -u origin main; then
+        error "Failed to push to GitHub. Please check your repository URL and permissions."
+    fi
     
     success "Successfully pushed to GitHub!"
 fi
