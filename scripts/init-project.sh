@@ -95,6 +95,19 @@ sed -i '' "s/SpringTemplateApplication/${NEW_PROJECT_NAME_PASCAL}Application/g" 
 # 5. 기존 패키지 디렉토리 삭제
 rm -rf src/main/java/org
 
+# application.yml 파일들을 example 파일로 변경
+info "Creating example configuration files..."
+for env in "" "-local" "-dev" "-prod"; do
+    if [ -f "src/main/resources/application${env}.yml" ]; then
+        mv "src/main/resources/application${env}.yml" "src/main/resources/application${env}.yml.example"
+    fi
+done
+
+# .gitignore에 실제 설정 파일 추가
+echo "# Application properties" >> .gitignore
+echo "src/main/resources/application.yml" >> .gitignore
+echo "src/main/resources/application-*.yml" >> .gitignore
+
 # 6. Git 초기화
 info "Initializing new Git repository..."
 rm -rf .git
