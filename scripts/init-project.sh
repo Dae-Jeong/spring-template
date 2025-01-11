@@ -22,6 +22,11 @@ info() {
     echo -e "${YELLOW}$1${NC}"
 }
 
+# 함수: 파스칼 케이스로 변환
+to_pascal_case() {
+    echo "$1" | awk -F'[^[:alnum:]]' '{for(i=1;i<=NF;i++)printf "%s", toupper(substr($i,1,1)) substr($i,2)}' 
+}
+
 # 필수 인자 체크
 if [ "$#" -ne 2 ]; then
     error "Usage: $0 <new-package-name> <new-project-name>"
@@ -32,6 +37,10 @@ NEW_PROJECT_NAME=$2
 OLD_PACKAGE_NAME="org.daejoeng"
 OLD_PROJECT_NAME="spring-template"
 
+# 프로젝트명을 파스칼 케이스로 변환 (예: my-project -> MyProject)
+NEW_PROJECT_NAME_PASCAL=$(to_pascal_case "$NEW_PROJECT_NAME")
+OLD_PROJECT_NAME_PASCAL="SpringTemplate"
+
 # 현재 디렉토리가 프로젝트 루트인지 확인
 if [ ! -f "build.gradle" ]; then
     error "Please run this script from the project root directory"
@@ -40,10 +49,12 @@ fi
 info "Initializing new project with:"
 info "Package name: $NEW_PACKAGE_NAME"
 info "Project name: $NEW_PROJECT_NAME"
+info "Application name: ${NEW_PROJECT_NAME_PASCAL}Application"
 
 # 1. build.gradle 수정
 info "Updating build.gradle..."
 sed -i '' "s/rootProject.name = '$OLD_PROJECT_NAME'/rootProject.name = '$NEW_PROJECT_NAME'/g" settings.gradle
+sed -i '' "s/group = '$OLD_PACKAGE_NAME'/group = '$NEW_PACKAGE_NAME'/g" build.gradle
 
 # 2. 패키지 디렉토리 구조 변경
 info "Updating package structure..."
@@ -61,17 +72,22 @@ info "Updating package names in source files..."
 find $NEW_PACKAGE_PATH -type f -name "*.java" -exec sed -i '' "s/package $OLD_PACKAGE_NAME/package $NEW_PACKAGE_NAME/g" {} +
 find $NEW_PACKAGE_PATH -type f -name "*.java" -exec sed -i '' "s/import $OLD_PACKAGE_NAME/import $NEW_PACKAGE_NAME/g" {} +
 
-# 4. 기존 패키지 디렉토리 삭제
+# 4. Application 클래스 이름 변경
+info "Updating application class name..."
+mv "$NEW_PACKAGE_PATH/SpringTemplateApplication.java" "$NEW_PACKAGE_PATH/${NEW_PROJECT_NAME_PASCAL}Application.java"
+sed -i '' "s/SpringTemplateApplication/${NEW_PROJECT_NAME_PASCAL}Application/g" "$NEW_PACKAGE_PATH/${NEW_PROJECT_NAME_PASCAL}Application.java"
+
+# 5. 기존 패키지 디렉토리 삭제
 rm -rf src/main/java/org
 
-# 5. Git 초기화
+# 6. Git 초기화
 info "Initializing new Git repository..."
 rm -rf .git
 git init
 git add .
 git commit -m "Initial commit from template"
 
-# 6. 이 스크립트 자신을 삭제
+# 7. 이 스크립트 자신을 삭제
 info "Cleaning up initialization script..."
 rm -- "$0"
 
