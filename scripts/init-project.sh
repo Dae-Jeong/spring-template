@@ -95,11 +95,17 @@ sed -i '' "s/SpringTemplateApplication/${NEW_PROJECT_NAME_PASCAL}Application/g" 
 # 5. 기존 패키지 디렉토리 삭제
 rm -rf src/main/java/org
 
-# application.yml 파일들을 example 파일로 변경
-info "Creating example configuration files..."
-for env in "" "-local" "-dev" "-prod"; do
-    if [ -f "src/main/resources/application${env}.yml" ]; then
-        mv "src/main/resources/application${env}.yml" "src/main/resources/application${env}.yml.example"
+# application.yml 파일 처리
+info "Setting up configuration files..."
+# application.yml은 example로 변경
+if [ -f "src/main/resources/application.yml" ]; then
+    mv "src/main/resources/application.yml" "src/main/resources/application.yml.example"
+fi
+
+# 환경별 설정 파일은 그대로 유지 (git에서 제외될 예정)
+for env in "-local" "-dev" "-prod"; do
+    if [ -f "src/main/resources/application${env}.yml.example" ]; then
+        rm "src/main/resources/application${env}.yml.example"
     fi
 done
 
