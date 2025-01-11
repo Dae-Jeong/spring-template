@@ -94,40 +94,19 @@ info "Setting up Git hooks..."
 chmod +x scripts/setup-git-hooks.sh
 ./scripts/setup-git-hooks.sh
 
-# 8. 초기 커밋
-info "Creating initial commit..."
-git add .
-if ! git commit -m "Initial commit from template"; then
-    error "Failed to create initial commit. Please check the error messages above."
-fi
-
-# 9. GitHub 저장소 설정 및 푸시
-if [ ! -z "$GITHUB_REPO_URL" ]; then
-    info "Setting up GitHub repository..."
-    if ! git remote add origin "$GITHUB_REPO_URL"; then
-        error "Failed to add GitHub remote repository."
-    fi
-    
-    info "Pushing to GitHub..."
-    if ! git branch -M main; then
-        error "Failed to create main branch."
-    fi
-    
-    if ! git push -u origin main; then
-        error "Failed to push to GitHub. Please check your repository URL and permissions."
-    fi
-    
-    success "Successfully pushed to GitHub!"
-fi
-
-# 10. 이 스크립트 자신을 삭제
-info "Cleaning up initialization script..."
-rm -- "$0"
-
 success "Project initialization completed successfully!"
 success "New project '$NEW_PROJECT_NAME' is ready to use."
 success "Git hooks are set up and ready to use."
 if [ ! -z "$GITHUB_REPO_URL" ]; then
-    success "Project is now available at: $GITHUB_REPO_URL"
+    success "GitHub repository URL: $GITHUB_REPO_URL"
 fi
-success "Please review the changes and update any remaining references manually if needed." 
+info "Next steps:"
+info "1. Review the changes"
+info "2. Run 'git add .' to stage all files"
+info "3. Run 'git commit -m \"Initial commit\"' to create your first commit"
+if [ ! -z "$GITHUB_REPO_URL" ]; then
+    info "4. Run the following commands to push to GitHub:"
+    info "   git remote add origin $GITHUB_REPO_URL"
+    info "   git branch -M main"
+    info "   git push -u origin main"
+fi 
