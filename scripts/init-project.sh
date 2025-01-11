@@ -97,16 +97,14 @@ rm -rf src/main/java/org
 
 # application.yml 파일 처리
 info "Setting up configuration files..."
-# 환경별 설정 파일들을 example로 변경
-for env in "-local" "-dev" "-prod"; do
-    if [ -f "src/main/resources/application${env}.yml" ]; then
-        cp "src/main/resources/application${env}.yml" "src/main/resources/application${env}.yml.example"
-        rm "src/main/resources/application${env}.yml"
-    fi
-done
+# application.yml을 example로 복사
+if [ -f "src/main/resources/application.yml" ]; then
+    cp "src/main/resources/application.yml" "src/main/resources/application.yml.example"
+fi
 
-# .gitignore에 실제 설정 파일 추가
+# .gitignore에 모든 실제 설정 파일 추가
 echo "# Application properties" >> .gitignore
+echo "src/main/resources/application.yml" >> .gitignore
 echo "src/main/resources/application-*.yml" >> .gitignore
 
 # 6. Git 초기화
