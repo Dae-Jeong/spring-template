@@ -1,31 +1,44 @@
 #!/bin/bash
 
-# 스크립트가 있는 디렉토리의 상위(프로젝트 루트) 디렉토리로 이동
-cd "$(dirname "$0")/.." || exit
+# 색상 정의
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
 
-# pre-commit 파일 생성
-cat > .git/hooks/pre-commit << 'EOF'
-#!/bin/bash
+# 함수: 에러 메시지 출력
+error() {
+    echo -e "${RED}Error: $1${NC}" >&2
+    exit 1
+}
 
-echo "Running spotless check..."
+# 함수: 성공 메시지 출력
+success() {
+    echo -e "${GREEN}$1${NC}"
+}
 
-# Stash any changes not in staging area
-git stash -q --keep-index
+# 함수: 정보 메시지 출력
+info() {
+    echo -e "${YELLOW}$1${NC}"
+}
 
-# Run spotless check
-./gradlew spotlessCheck
+# pre-commit이 설치되어 있는지 확인
+if ! command -v pre-commit &> /dev/null; then
+    error "pre-commit is not installed. Please install it first: pip install pre-commit"
+fi
 
-# Store the last exit code
-RESULT=$?
+# 현재 디렉토리가 프로젝트 루트인지 확인
+if [ ! -f "build.gradle" ]; then
+    error "Please run this script from the project root directory"
+fi
 
-# Unstash changes
-git stash pop -q
+# pre-commit 설치 및 설정
+info "Installing pre-commit hooks..."
+pre-commit install || error "Failed to install pre-commit hooks"
 
-# Return the spotless result
-exit $RESULT
-EOF
+# Spotless 적용
+info "Running Spotless apply..."
+./gradlew spotlessApply || error "Failed to apply Spotless"
 
-# pre-commit 파일에 실행 권한 부여
-chmod +x .git/hooks/pre-commit
-
-echo "✅ Git hooks have been set up successfully!" 
+success "Git hooks setup completed successfully!"
+success "Pre-commit hooks are now installed and configured." 

@@ -9,6 +9,7 @@ Spring Boot 기반의 REST API 프로젝트 템플릿입니다.
 - 글로벌 예외 처리 및 커스텀 예외
 - 환경별(local, dev, prod) 설정 분리
 - H2 인메모리 데이터베이스 (개발용)
+- pre-commit hooks를 통한 코드 품질 관리
 
 ## 시작하기
 
@@ -31,6 +32,26 @@ Spring Boot 기반의 REST API 프로젝트 템플릿입니다.
    ```bash
    ./scripts/init-project.sh <새로운패키지명> <새로운프로젝트명>
    ```
+
+### Git Hooks 설정
+
+1. pre-commit 설치:
+   ```bash
+   pip install pre-commit
+   ```
+
+2. Git hooks 설정:
+   ```bash
+   ./scripts/setup-git-hooks.sh
+   ```
+
+이 설정으로 커밋 전에 자동으로 다음 검사가 실행됩니다:
+- 코드 스타일 검사 (Spotless)
+- 테스트 실행
+- YAML 파일 유효성 검사
+- 큰 파일 커밋 방지
+- 병합 충돌 마커 검사
+- main 브랜치 직접 커밋 방지
 
 ## 프로젝트 구조
 
