@@ -28,12 +28,13 @@ to_pascal_case() {
 }
 
 # 필수 인자 체크
-if [ "$#" -ne 2 ]; then
-    error "Usage: $0 <new-package-name> <new-project-name>"
+if [ "$#" -lt 2 ]; then
+    error "Usage: $0 <new-package-name> <new-project-name> [github-repo-url]"
 fi
 
 NEW_PACKAGE_NAME=$1
 NEW_PROJECT_NAME=$2
+GITHUB_REPO_URL=$3
 OLD_PACKAGE_NAME="org.daejoeng"
 OLD_PROJECT_NAME="spring-template"
 
@@ -50,6 +51,9 @@ info "Initializing new project with:"
 info "Package name: $NEW_PACKAGE_NAME"
 info "Project name: $NEW_PROJECT_NAME"
 info "Application name: ${NEW_PROJECT_NAME_PASCAL}Application"
+if [ ! -z "$GITHUB_REPO_URL" ]; then
+    info "GitHub repository: $GITHUB_REPO_URL"
+fi
 
 # 1. build.gradle 수정
 info "Updating build.gradle..."
@@ -84,13 +88,36 @@ rm -rf src/main/java/org
 info "Initializing new Git repository..."
 rm -rf .git
 git init
+
+# 7. Git hooks 설정
+info "Setting up Git hooks..."
+chmod +x scripts/setup-git-hooks.sh
+./scripts/setup-git-hooks.sh
+
+# 8. 초기 커밋
 git add .
 git commit -m "Initial commit from template"
 
-# 7. 이 스크립트 자신을 삭제
+# 9. GitHub 저장소 설정 및 푸시
+if [ ! -z "$GITHUB_REPO_URL" ]; then
+    info "Setting up GitHub repository..."
+    git remote add origin "$GITHUB_REPO_URL"
+    
+    info "Pushing to GitHub..."
+    git branch -M main
+    git push -u origin main
+    
+    success "Successfully pushed to GitHub!"
+fi
+
+# 10. 이 스크립트 자신을 삭제
 info "Cleaning up initialization script..."
 rm -- "$0"
 
 success "Project initialization completed successfully!"
 success "New project '$NEW_PROJECT_NAME' is ready to use."
+success "Git hooks are set up and ready to use."
+if [ ! -z "$GITHUB_REPO_URL" ]; then
+    success "Project is now available at: $GITHUB_REPO_URL"
+fi
 success "Please review the changes and update any remaining references manually if needed." 
