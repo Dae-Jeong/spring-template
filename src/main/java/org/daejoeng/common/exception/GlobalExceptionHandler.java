@@ -2,7 +2,6 @@
 package org.daejoeng.common.exception;
 
 import org.daejoeng.common.response.ApiResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,11 +30,12 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
   protected ResponseEntity<ApiResponse<Void>> handleAuthenticationException(Exception e) {
-    AuthenticationException authException = new AuthenticationException(ErrorCode.INVALID_CREDENTIALS);
+    AuthenticationException authException =
+        new AuthenticationException(ErrorCode.INVALID_CREDENTIALS);
     return ResponseEntity.status(authException.getErrorCode().getStatus())
-        .body(ApiResponse.error(
-            authException.getErrorCode().getStatus(),
-            authException.getMessage()));
+        .body(
+            ApiResponse.error(
+                authException.getErrorCode().getStatus(), authException.getMessage()));
   }
 
   @ExceptionHandler(Exception.class)

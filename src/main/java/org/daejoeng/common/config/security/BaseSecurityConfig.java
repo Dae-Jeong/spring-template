@@ -16,49 +16,53 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @RequiredArgsConstructor
 public abstract class BaseSecurityConfig {
-    private final JwtTokenProvider tokenProvider;
+  private final JwtTokenProvider tokenProvider;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
-    protected SecurityFilterChain baseSecurityFilterChain(HttpSecurity http) throws Exception {
-        // JWT 필터 추가
-        http.addFilterBefore(new JwtAuthenticationFilter(tokenProvider), 
-                           UsernamePasswordAuthenticationFilter.class);
+  protected SecurityFilterChain baseSecurityFilterChain(HttpSecurity http) throws Exception {
+    // JWT 필터 추가
+    http.addFilterBefore(
+        new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
 
-        // 기본 설정
-        http.csrf(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .sessionManagement(
-                sessionManagement ->
-                    sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    // 기본 설정
+    http.csrf(AbstractHttpConfigurer::disable)
+        .formLogin(AbstractHttpConfigurer::disable)
+        .httpBasic(AbstractHttpConfigurer::disable)
+        .sessionManagement(
+            sessionManagement ->
+                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        // 인증 설정
-        http.authorizeHttpRequests(authorize -> {
-            // 공통으로 허용할 경로 설정
-            authorize.requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/health").permitAll();
+    // 인증 설정
+    http.authorizeHttpRequests(
+        authorize -> {
+          // 공통으로 허용할 경로 설정
+          authorize
+              .requestMatchers("/api/auth/**")
+              .permitAll()
+              .requestMatchers("/api/health")
+              .permitAll();
 
-            // 프로파일별 설정 추가
-            configureAuthorization(authorize);
+          // 프로파일별 설정 추가
+          configureAuthorization(authorize);
         });
 
-        // 추가 설정을 위한 hook 메서드
-        additionalHttpConfig(http);
+    // 추가 설정을 위한 hook 메서드
+    additionalHttpConfig(http);
 
-        return http.build();
-    }
+    return http.build();
+  }
 
-    // 각 프로파일별로 구현할 메서드
-    protected abstract void configureAuthorization(
-        AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry
-            authorize);
-    
-    // 추가 HTTP 설정을 위한 hook 메서드
-    protected void additionalHttpConfig(HttpSecurity http) throws Exception {
-        // 기본 구현은 비어있음
-    }
+  // 각 프로파일별로 구현할 메서드
+  protected abstract void configureAuthorization(
+      AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry
+          authorize);
+
+  // 추가 HTTP 설정을 위한 hook 메서드
+  protected void additionalHttpConfig(HttpSecurity http) throws Exception {
+    // 기본 구현은 비어있음
+  }
 }

@@ -22,23 +22,57 @@ info() {
     echo -e "${YELLOW}$1${NC}"
 }
 
-# pre-commit이 설치되어 있는지 확인
-if ! command -v pre-commit &> /dev/null; then
-    error "pre-commit is not installed. Please install it first: pip install pre-commit"
-fi
-
 # 현재 디렉토리가 프로젝트 루트인지 확인
 if [ ! -f "build.gradle" ]; then
     error "Please run this script from the project root directory"
 fi
 
-# pre-commit 설치 및 설정
-info "Installing pre-commit hooks..."
-pre-commit install || error "Failed to install pre-commit hooks"
+# Git hooks 디렉토리 생성
+mkdir -p .git/hooks
+
+# pre-commit hook 생성
+cat > .git/hooks/pre-commit << 'EOF'
+#!/bin/bash
+
+echo "Running pre-commit checks..."
+
+# Stash any changes not in staging area
+git stash -q --keep-index
+
+# Run Spotless check
+echo "Running Spotless check..."
+./gradlew spotlessCheck
+SPOTLESS_RESULT=$?
+
+# Run tests
+echo "Running tests..."
+./gradlew test
+TEST_RESULT=$?
+
+# Restore stashed changes
+git stash pop -q
+
+# Check results
+if [ $SPOTLESS_RESULT -ne 0 ]; then
+    echo "❌ Spotless check failed. Please run './gradlew spotlessApply' and commit again."
+    exit 1
+fi
+
+if [ $TEST_RESULT -ne 0 ]; then
+    echo "❌ Tests failed. Please fix the tests and commit again."
+    exit 1
+fi
+
+echo "✅ All checks passed!"
+exit 0
+EOF
+
+# pre-commit hook에 실행 권한 부여
+chmod +x .git/hooks/pre-commit
 
 # Spotless 적용
-info "Running Spotless apply..."
+info "Running initial Spotless apply..."
 ./gradlew spotlessApply || error "Failed to apply Spotless"
 
 success "Git hooks setup completed successfully!"
-success "Pre-commit hooks are now installed and configured." 
+success "Pre-commit hook is now installed and configured." 
