@@ -76,6 +76,20 @@ info "Updating package names in source files..."
 find $NEW_PACKAGE_PATH -type f -name "*.java" -exec sed -i '' "s/package $OLD_PACKAGE_NAME/package $NEW_PACKAGE_NAME/g" {} +
 find $NEW_PACKAGE_PATH -type f -name "*.java" -exec sed -i '' "s/import $OLD_PACKAGE_NAME/import $NEW_PACKAGE_NAME/g" {} +
 
+# 테스트 파일도 함께 업데이트
+info "Updating test files..."
+TEST_PACKAGE_PATH="src/test/java/$(echo $NEW_PACKAGE_NAME | tr '.' '/')"
+mkdir -p $TEST_PACKAGE_PATH
+if [ -f "src/test/java/org/daejoeng/SpringTemplateApplicationTests.java" ]; then
+    mv "src/test/java/org/daejoeng/SpringTemplateApplicationTests.java" "$TEST_PACKAGE_PATH/${NEW_PROJECT_NAME_PASCAL}ApplicationTests.java"
+    sed -i '' "s/package org.daejoeng/package $NEW_PACKAGE_NAME/g" "$TEST_PACKAGE_PATH/${NEW_PROJECT_NAME_PASCAL}ApplicationTests.java"
+    sed -i '' "s/SpringTemplateApplicationTests/${NEW_PROJECT_NAME_PASCAL}ApplicationTests/g" "$TEST_PACKAGE_PATH/${NEW_PROJECT_NAME_PASCAL}ApplicationTests.java"
+fi
+
+# Spotless 적용
+info "Applying Spotless formatting..."
+./gradlew spotlessApply
+
 # 4. Application 클래스 이름 변경
 info "Updating application class name..."
 mv "$NEW_PACKAGE_PATH/SpringTemplateApplication.java" "$NEW_PACKAGE_PATH/${NEW_PROJECT_NAME_PASCAL}Application.java"
